@@ -113,7 +113,7 @@ export default function PhasesView() {
               <button
                 onClick={() => fbTogglePhaseExpand(phase.id, !phase.expanded)}
                 style={{
-                  width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px',
                   padding: '20px', background: 'none', border: 'none', cursor: 'pointer',
                   textAlign: 'left',
                 }}

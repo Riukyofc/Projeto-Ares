@@ -156,7 +156,7 @@ export default function BOMView() {
                   </div>
                   <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '8px' }}>{item.functionDesc}</p>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
                   <div style={{ textAlign: 'right' }}>
                     <div style={{ fontSize: '11px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Custo</div>
                     <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)' }}>R$ {item.costDisplay}</div>

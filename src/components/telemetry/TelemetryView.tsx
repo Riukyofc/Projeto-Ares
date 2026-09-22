@@ -201,8 +201,8 @@ export default function TelemetryView() {
             <p className="section-subtitle">ESP32 → DHT11 + LDR + HC-SR04 • {packetCount} pacotes</p>
           </div>
         </div>
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <div style={{ display: 'flex', background: 'var(--bg-surface-hover)', borderRadius: '6px', padding: '2px', marginRight: '8px' }}>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', background: 'var(--bg-surface-hover)', borderRadius: '6px', padding: '2px', marginRight: '8px', flexWrap: 'wrap' }}>
             <button onClick={() => setViewMode('realtime')} className={`btn ${viewMode === 'realtime' ? 'btn-primary' : 'btn-ghost'}`} style={{ padding: '6px 12px', fontSize: '13px', borderRadius: '4px' }}>
               <Activity size={14} style={{ marginRight: '6px' }} /> Tempo Real
             </button>
@@ -258,7 +258,7 @@ export default function TelemetryView() {
           <p style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '24px' }}>
             Total de {history.length} pontos de dados coletados nesta sessão.
           </p>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '24px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '16px', marginBottom: '24px' }}>
             <div style={{ padding: '16px', background: 'var(--bg-base)', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}>
               <div style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '8px' }}>Média de Temperatura Global</div>
               <div style={{ fontSize: '24px', fontWeight: 600, color: 'var(--accent-red)' }}>{avgTemp}°C</div>
@@ -268,9 +268,9 @@ export default function TelemetryView() {
               <div style={{ fontSize: '24px', fontWeight: 600, color: 'var(--accent-blue)' }}>{avgHum}%</div>
             </div>
           </div>
-          <div style={{ padding: '16px', background: 'var(--bg-base)', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}>
-            <div style={{ fontSize: '14px', fontWeight: 500, marginBottom: '12px' }}>Tabela de Histórico (Últimos 10)</div>
-            <table style={{ width: '100%', fontSize: '13px', textAlign: 'left' }}>
+          <div style={{ padding: '16px', background: 'var(--bg-base)', borderRadius: '8px', border: '1px solid var(--border-subtle)', overflowX: 'auto' }}>
+            <div style={{ fontSize: '14px', fontWeight: 500, marginBottom: '12px', minWidth: '300px' }}>Tabela de Histórico (Últimos 10)</div>
+            <table style={{ width: '100%', minWidth: '400px', fontSize: '13px', textAlign: 'left' }}>
               <thead>
                 <tr style={{ color: 'var(--text-muted)' }}>
                   <th style={{ padding: '8px 0' }}>Horário</th>
