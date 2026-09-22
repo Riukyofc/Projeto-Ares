@@ -16,6 +16,7 @@ import TelemetryView from './components/telemetry/TelemetryView';
 import ChatView from './components/chat/ChatView';
 import DocsView from './components/docs/DocsView';
 import AresAIView from './components/ai/AresAIView';
+import AuditLogsView from './components/audit/AuditLogsView';
 import { motion, AnimatePresence } from 'motion/react';
 
 function AppContent() {
@@ -55,6 +56,8 @@ function AppContent() {
         return <DocsView />;
       case 'ai':
         return <AresAIView />;
+      case 'audit':
+        return <AuditLogsView />;
       default:
         return <DashboardView />;
     }

@@ -25,7 +25,8 @@ export type ViewId =
   | 'telemetry'
   | 'chat'
   | 'docs'
-  | 'ai';
+  | 'ai'
+  | 'audit';
 
 // ==========================================
 // USER & AUTH
@@ -150,6 +151,15 @@ export interface DocSection {
 // MISSION DATA (Aggregate)
 // ==========================================
 
+export interface AuditLog {
+  id: string;
+  action: string;
+  details: string;
+  user: string;
+  timestamp: string;
+  type: 'bom' | 'phase' | 'doc' | 'system';
+}
+
 export interface MissionMeta {
   projectName: string;
   version: string;
@@ -161,6 +171,7 @@ export interface MissionData {
   meta: MissionMeta;
   bom: BOMItem[];
   phases: Phase[];
+  logs: AuditLog[];
 }
 
 // ==========================================
@@ -179,7 +190,8 @@ export type MissionAction =
   | { type: 'ADD_TASK'; payload: { phaseId: string; task: Task } }
   | { type: 'DELETE_TASK'; payload: { phaseId: string; taskId: string } }
   | { type: 'TOGGLE_PHASE_EXPAND'; payload: string }
-  | { type: 'EXPAND_ALL_PHASES'; payload: boolean };
+  | { type: 'EXPAND_ALL_PHASES'; payload: boolean }
+  | { type: 'ADD_AUDIT_LOG'; payload: AuditLog };
 
 // ==========================================
 // TOAST NOTIFICATIONS

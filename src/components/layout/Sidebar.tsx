@@ -7,7 +7,7 @@ import type { ViewId } from '../../types/mission';
 import aresLogo from '../../assets/logo.png';
 import {
   LayoutDashboard, Cpu, ListChecks, Activity,
-  Radio, BookOpen, Bot, LogOut, ChevronLeft, ChevronRight, Menu,
+  Radio, BookOpen, Bot, LogOut, ChevronLeft, ChevronRight, Menu, History,
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -19,6 +19,7 @@ const NAV_ITEMS: { id: ViewId; label: string; icon: typeof LayoutDashboard }[] =
   { id: 'chat', label: 'Comunicações', icon: Radio },
   { id: 'docs', label: 'Documentação', icon: BookOpen },
   { id: 'ai', label: 'ARES AI', icon: Bot },
+  { id: 'audit', label: 'Logs de Auditoria', icon: History },
 ];
 
 export default function Sidebar() {

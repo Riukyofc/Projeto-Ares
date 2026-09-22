@@ -5,7 +5,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import type { TelemetryState } from '../../types/mission';
 import {
   Activity, Thermometer, Droplets, Sun, Radar,
-  Battery, AlertTriangle, Play, Pause, RotateCcw,
+  Battery, AlertTriangle, Play, Pause, RotateCcw, LineChart,
 } from 'lucide-react';
 import { Chart, registerables } from 'chart.js';
 
@@ -19,7 +19,8 @@ interface DataPoint {
   dist: number;
 }
 
-const MAX_POINTS = 30;
+const MAX_POINTS = 30; // 1 min (2s interval)
+const MAX_HISTORY = 1000; // Store up to 1000 points for Analytics
 
 function randomBetween(min: number, max: number) {
   return Math.round((Math.random() * (max - min) + min) * 10) / 10;
@@ -34,6 +35,7 @@ export default function TelemetryView() {
     tempSum: 25, tempCount: 1, humSum: 55, humCount: 1, anomaly: null,
   });
   const [packetCount, setPacketCount] = useState(0);
+  const [viewMode, setViewMode] = useState<'realtime' | 'analytics'>('realtime');
 
   const tempChartRef = useRef<HTMLCanvasElement>(null);
   const humChartRef = useRef<HTMLCanvasElement>(null);
@@ -128,7 +130,7 @@ export default function TelemetryView() {
 
       setHistory((prev) => {
         const next = [...prev, point];
-        return next.length > MAX_POINTS ? next.slice(-MAX_POINTS) : next;
+        return next.length > MAX_HISTORY ? next.slice(-MAX_HISTORY) : next;
       });
 
       setTelemetry((prev) => ({
@@ -200,6 +202,14 @@ export default function TelemetryView() {
           </div>
         </div>
         <div style={{ display: 'flex', gap: '8px' }}>
+          <div style={{ display: 'flex', background: 'var(--bg-surface-hover)', borderRadius: '6px', padding: '2px', marginRight: '8px' }}>
+            <button onClick={() => setViewMode('realtime')} className={`btn ${viewMode === 'realtime' ? 'btn-primary' : 'btn-ghost'}`} style={{ padding: '6px 12px', fontSize: '13px', borderRadius: '4px' }}>
+              <Activity size={14} style={{ marginRight: '6px' }} /> Tempo Real
+            </button>
+            <button onClick={() => setViewMode('analytics')} className={`btn ${viewMode === 'analytics' ? 'btn-primary' : 'btn-ghost'}`} style={{ padding: '6px 12px', fontSize: '13px', borderRadius: '4px' }}>
+              <LineChart size={14} style={{ marginRight: '6px' }} /> Analytics
+            </button>
+          </div>
           <button onClick={() => setRunning(!running)} className={`btn ${running ? 'btn-danger' : 'btn-primary'}`} style={{ fontSize: '13px', gap: '6px' }}>
             {running ? <><Pause size={16} /> Pausar</> : <><Play size={16} /> Iniciar Simulação</>}
           </button>
@@ -224,21 +234,67 @@ export default function TelemetryView() {
         </div>
       )}
 
-      {/* Sensor Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '16px', marginBottom: '24px' }}>
-        <SensorCard icon={<Thermometer size={16} />} label="Temperatura" value={`${telemetry.temp}°C`} sub={`Min ${telemetry.tempMin}° / Max ${telemetry.tempMax}° / Avg ${avgTemp}°`} color="var(--accent-red)" />
-        <SensorCard icon={<Droplets size={16} />} label="Umidade" value={`${telemetry.hum}%`} sub={`Min ${telemetry.humMin}% / Max ${telemetry.humMax}% / Avg ${avgHum}%`} color="var(--accent-blue)" />
-        <SensorCard icon={<Sun size={16} />} label="Luminosidade" value={`${telemetry.ldr}`} sub={`LDR Max: ${telemetry.ldrMax}`} color="var(--accent-amber)" />
-        <SensorCard icon={<Radar size={16} />} label="Distância" value={`${telemetry.dist}cm`} sub={telemetry.dist < 15 ? '⚠ OBSTÁCULO!' : 'Via livre'} color={telemetry.dist < 15 ? 'var(--accent-red)' : 'var(--accent-green)'} />
-        <SensorCard icon={<Battery size={16} />} label="Bateria" value={`${telemetry.vbat}V`} sub={telemetry.vbat > 7 ? 'Carga OK' : '⚠ Baixa'} color={telemetry.vbat > 7 ? 'var(--accent-green)' : 'var(--accent-amber)'} />
-      </div>
+      {viewMode === 'realtime' ? (
+        <>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+            <SensorCard icon={<Thermometer size={16} />} label="Temperatura" value={`${telemetry.temp}°C`} sub={`Min ${telemetry.tempMin}° / Max ${telemetry.tempMax}° / Avg ${avgTemp}°`} color="var(--accent-red)" />
+            <SensorCard icon={<Droplets size={16} />} label="Umidade" value={`${telemetry.hum}%`} sub={`Min ${telemetry.humMin}% / Max ${telemetry.humMax}% / Avg ${avgHum}%`} color="var(--accent-blue)" />
+            <SensorCard icon={<Sun size={16} />} label="Luminosidade" value={`${telemetry.ldr}`} sub={`LDR Max: ${telemetry.ldrMax}`} color="var(--accent-amber)" />
+            <SensorCard icon={<Radar size={16} />} label="Distância" value={`${telemetry.dist}cm`} sub={telemetry.dist < 15 ? '⚠ OBSTÁCULO!' : 'Via livre'} color={telemetry.dist < 15 ? 'var(--accent-red)' : 'var(--accent-green)'} />
+            <SensorCard icon={<Battery size={16} />} label="Bateria" value={`${telemetry.vbat}V`} sub={telemetry.vbat > 7 ? 'Carga OK' : '⚠ Baixa'} color={telemetry.vbat > 7 ? 'var(--accent-green)' : 'var(--accent-amber)'} />
+          </div>
 
-      {/* Charts */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
-        <ChartCard title="Temperatura (°C)" canvasRef={tempChartRef} />
-        <ChartCard title="Umidade (%)" canvasRef={humChartRef} />
-        <ChartCard title="Luminosidade (LDR)" canvasRef={ldrChartRef} />
-      </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
+            <ChartCard title="Temperatura (°C)" canvasRef={tempChartRef} />
+            <ChartCard title="Umidade (%)" canvasRef={humChartRef} />
+            <ChartCard title="Luminosidade (LDR)" canvasRef={ldrChartRef} />
+          </div>
+        </>
+      ) : (
+        <div className="card animate-fade-in" style={{ padding: '24px' }}>
+          <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '16px' }}>
+            Analytics & Histórico Consolidado
+          </h3>
+          <p style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '24px' }}>
+            Total de {history.length} pontos de dados coletados nesta sessão.
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '24px' }}>
+            <div style={{ padding: '16px', background: 'var(--bg-base)', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}>
+              <div style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '8px' }}>Média de Temperatura Global</div>
+              <div style={{ fontSize: '24px', fontWeight: 600, color: 'var(--accent-red)' }}>{avgTemp}°C</div>
+            </div>
+            <div style={{ padding: '16px', background: 'var(--bg-base)', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}>
+              <div style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '8px' }}>Média de Umidade Global</div>
+              <div style={{ fontSize: '24px', fontWeight: 600, color: 'var(--accent-blue)' }}>{avgHum}%</div>
+            </div>
+          </div>
+          <div style={{ padding: '16px', background: 'var(--bg-base)', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}>
+            <div style={{ fontSize: '14px', fontWeight: 500, marginBottom: '12px' }}>Tabela de Histórico (Últimos 10)</div>
+            <table style={{ width: '100%', fontSize: '13px', textAlign: 'left' }}>
+              <thead>
+                <tr style={{ color: 'var(--text-muted)' }}>
+                  <th style={{ padding: '8px 0' }}>Horário</th>
+                  <th>Temp</th>
+                  <th>Umid</th>
+                  <th>LDR</th>
+                  <th>Distância</th>
+                </tr>
+              </thead>
+              <tbody>
+                {history.slice(-10).reverse().map((p, i) => (
+                  <tr key={i} style={{ borderTop: '1px solid var(--border-subtle)' }}>
+                    <td style={{ padding: '8px 0', color: 'var(--text-secondary)' }}>{p.time}</td>
+                    <td style={{ color: 'var(--accent-red)' }}>{p.temp}°C</td>
+                    <td style={{ color: 'var(--accent-blue)' }}>{p.hum}%</td>
+                    <td style={{ color: 'var(--accent-amber)' }}>{p.ldr}</td>
+                    <td>{p.dist}cm</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -21,6 +21,7 @@ import type {
   ToastMessage,
   ToastType,
   ViewId,
+  AuditLog,
 } from '../types/mission';
 import { PartStatus } from '../types/mission';
 import { useAuth } from '../lib/auth';
@@ -164,6 +165,8 @@ function missionReducer(state: MissionData, action: MissionAction): MissionData 
       };
     case 'EXPAND_ALL_PHASES':
       return { ...state, phases: state.phases.map((p) => ({ ...p, expanded: action.payload })) };
+    case 'ADD_AUDIT_LOG':
+      return { ...state, logs: [action.payload, ...state.logs] };
     default:
       return state;
   }
@@ -213,6 +216,7 @@ const initialData: MissionData = {
   meta: { projectName: 'Projeto Ares', version: '2.0.0', lastUpdated: '' },
   bom: [],
   phases: [],
+  logs: [],
 };
 
 export function MissionProvider({ children }: { children: ReactNode }) {
@@ -296,41 +300,62 @@ export function MissionProvider({ children }: { children: ReactNode }) {
     };
   }, [user]);
 
+  const createAuditLog = useCallback((actionStr: string, detailsStr: string, type: AuditLog['type']) => {
+    const log: AuditLog = {
+      id: `log-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      action: actionStr,
+      details: detailsStr,
+      user: user?.displayName || user?.email?.split('@')[0] || 'Desconhecido',
+      timestamp: new Date().toISOString(),
+      type,
+    };
+    dispatch({ type: 'ADD_AUDIT_LOG', payload: log });
+  }, [user]);
+
   // Firebase-backed action wrappers
   const fbAddBOMItemFn = useCallback(async (item: Omit<BOMItem, 'id'>) => {
     await fbAddBOM(item);
+    createAuditLog('Adicionou peça ao BOM', item.name, 'bom');
     addToast('Peça adicionada ao BOM!', 'success');
-  }, [addToast]);
+  }, [addToast, createAuditLog]);
 
   const fbUpdateBOMItemFn = useCallback(async (id: string, d: Partial<BOMItem>) => {
     await fbUpdateBOM(id, d);
-  }, []);
+    createAuditLog('Atualizou peça no BOM', d.name || 'Status/Detalhes alterados', 'bom');
+  }, [createAuditLog]);
 
   const fbDeleteBOMItemFn = useCallback(async (id: string) => {
     await fbDeleteBOM(id);
+    createAuditLog('Removeu peça do BOM', `ID: ${id}`, 'bom');
     addToast('Peça removida do BOM.', 'info');
-  }, [addToast]);
+  }, [addToast, createAuditLog]);
 
   const fbToggleTaskFn = useCallback(async (phaseId: string, phase: Phase, taskId: string, completed: boolean) => {
     const updatedTasks = phase.tasks.map((t) => (t.id === taskId ? { ...t, completed } : t));
     await updatePhaseTasks(phaseId, updatedTasks);
-  }, []);
+    const task = phase.tasks.find(t => t.id === taskId);
+    createAuditLog(completed ? 'Concluiu tarefa' : 'Reabriu tarefa', task?.title || '', 'phase');
+  }, [createAuditLog]);
 
   const fbUpdateTaskNotesFn = useCallback(async (phaseId: string, phase: Phase, taskId: string, notes: string) => {
     const updatedTasks = phase.tasks.map((t) => (t.id === taskId ? { ...t, notes } : t));
     await updatePhaseTasks(phaseId, updatedTasks);
+    // Not logging every note keystroke/blur to avoid spam, unless desired.
   }, []);
 
   const fbAddTaskFn = useCallback(async (phaseId: string, phase: Phase, task: Task) => {
     await addTaskToPhase(phaseId, phase.tasks, task);
+    createAuditLog('Criou nova tarefa', task.title, 'phase');
     addToast('Tarefa adicionada!', 'success');
-  }, [addToast]);
+  }, [addToast, createAuditLog]);
 
   const fbDeleteTaskFn = useCallback(async (phaseId: string, phase: Phase, taskId: string) => {
+    const task = phase.tasks.find((t) => t.id === taskId);
     const filtered = phase.tasks.filter((t) => t.id !== taskId);
     await updatePhaseTasks(phaseId, filtered);
+    createAuditLog('Excluiu tarefa', task?.title || '', 'phase');
     addToast('Tarefa excluída.', 'info');
-  }, [addToast]);
+  }, [addToast, createAuditLog]);
 
   const fbTogglePhaseExpandFn = useCallback(async (phaseId: string, expanded: boolean) => {
     await updatePhase(phaseId, { expanded });
@@ -342,7 +367,8 @@ export function MissionProvider({ children }: { children: ReactNode }) {
 
   const fbUpdateDocFn = useCallback(async (id: string, d: Partial<DocSection>) => {
     await fbUpdateDoc(id, d);
-  }, []);
+    createAuditLog('Atualizou documentação', d.title || id, 'doc');
+  }, [createAuditLog]);
 
   return (
     <MissionContext.Provider
