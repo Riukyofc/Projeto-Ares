@@ -234,23 +234,23 @@ export default function TelemetryView() {
         </div>
       )}
 
-      {viewMode === 'realtime' ? (
-        <>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '16px', marginBottom: '24px' }}>
-            <SensorCard icon={<Thermometer size={16} />} label="Temperatura" value={`${telemetry.temp}°C`} sub={`Min ${telemetry.tempMin}° / Max ${telemetry.tempMax}° / Avg ${avgTemp}°`} color="var(--accent-red)" />
-            <SensorCard icon={<Droplets size={16} />} label="Umidade" value={`${telemetry.hum}%`} sub={`Min ${telemetry.humMin}% / Max ${telemetry.humMax}% / Avg ${avgHum}%`} color="var(--accent-blue)" />
-            <SensorCard icon={<Sun size={16} />} label="Luminosidade" value={`${telemetry.ldr}`} sub={`LDR Max: ${telemetry.ldrMax}`} color="var(--accent-amber)" />
-            <SensorCard icon={<Radar size={16} />} label="Distância" value={`${telemetry.dist}cm`} sub={telemetry.dist < 15 ? '⚠ OBSTÁCULO!' : 'Via livre'} color={telemetry.dist < 15 ? 'var(--accent-red)' : 'var(--accent-green)'} />
-            <SensorCard icon={<Battery size={16} />} label="Bateria" value={`${telemetry.vbat}V`} sub={telemetry.vbat > 7 ? 'Carga OK' : '⚠ Baixa'} color={telemetry.vbat > 7 ? 'var(--accent-green)' : 'var(--accent-amber)'} />
-          </div>
+      <div style={{ display: viewMode === 'realtime' ? 'block' : 'none' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+          <SensorCard icon={<Thermometer size={16} />} label="Temperatura" value={`${telemetry.temp}°C`} sub={`Min ${telemetry.tempMin}° / Max ${telemetry.tempMax}° / Avg ${avgTemp}°`} color="var(--accent-red)" />
+          <SensorCard icon={<Droplets size={16} />} label="Umidade" value={`${telemetry.hum}%`} sub={`Min ${telemetry.humMin}% / Max ${telemetry.humMax}% / Avg ${avgHum}%`} color="var(--accent-blue)" />
+          <SensorCard icon={<Sun size={16} />} label="Luminosidade" value={`${telemetry.ldr}`} sub={`LDR Max: ${telemetry.ldrMax}`} color="var(--accent-amber)" />
+          <SensorCard icon={<Radar size={16} />} label="Distância" value={`${telemetry.dist}cm`} sub={telemetry.dist < 15 ? '⚠ OBSTÁCULO!' : 'Via livre'} color={telemetry.dist < 15 ? 'var(--accent-red)' : 'var(--accent-green)'} />
+          <SensorCard icon={<Battery size={16} />} label="Bateria" value={`${telemetry.vbat}V`} sub={telemetry.vbat > 7 ? 'Carga OK' : '⚠ Baixa'} color={telemetry.vbat > 7 ? 'var(--accent-green)' : 'var(--accent-amber)'} />
+        </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
-            <ChartCard title="Temperatura (°C)" canvasRef={tempChartRef} />
-            <ChartCard title="Umidade (%)" canvasRef={humChartRef} />
-            <ChartCard title="Luminosidade (LDR)" canvasRef={ldrChartRef} />
-          </div>
-        </>
-      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
+          <ChartCard title="Temperatura (°C)" canvasRef={tempChartRef} />
+          <ChartCard title="Umidade (%)" canvasRef={humChartRef} />
+          <ChartCard title="Luminosidade (LDR)" canvasRef={ldrChartRef} />
+        </div>
+      </div>
+
+      {viewMode === 'analytics' && (
         <div className="card animate-fade-in" style={{ padding: '24px' }}>
           <h3 style={{ fontSize: '16px', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '16px' }}>
             Analytics & Histórico Consolidado
