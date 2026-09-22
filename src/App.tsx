@@ -16,6 +16,7 @@ import TelemetryView from './components/telemetry/TelemetryView';
 import ChatView from './components/chat/ChatView';
 import DocsView from './components/docs/DocsView';
 import AresAIView from './components/ai/AresAIView';
+import { motion, AnimatePresence } from 'motion/react';
 
 function AppContent() {
   const { activeView, loading } = useMission();
@@ -65,7 +66,18 @@ function AppContent() {
       <main className="app-main">
         <Header />
         <div className="app-content">
-          {renderView()}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeView}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+              style={{ width: '100%', height: '100%' }}
+            >
+              {renderView()}
+            </motion.div>
+          </AnimatePresence>
         </div>
       </main>
       <ToastContainer />

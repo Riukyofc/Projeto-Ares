@@ -8,6 +8,7 @@ import {
   ListChecks, ChevronDown, ChevronUp, Plus, Trash2,
   CheckCircle, Circle, StickyNote, ChevronsUpDown,
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 
 export default function PhasesView() {
   const {
@@ -151,16 +152,32 @@ export default function PhasesView() {
               </button>
 
               {/* Phase Content (Tasks) */}
-              {phase.expanded && (
-                <div style={{ padding: '0 20px 20px', borderTop: '1px solid var(--border-subtle)' }}>
+              <AnimatePresence>
+                {phase.expanded && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    style={{ overflow: 'hidden' }}
+                  >
+                    <div style={{ padding: '0 20px 20px', borderTop: '1px solid var(--border-subtle)' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '16px' }}>
-                    {phase.tasks.map((task) => (
-                      <div key={task.id} style={{
-                        display: 'flex', flexDirection: 'column', gap: '6px',
-                        padding: '12px 14px', borderRadius: '8px',
-                        background: task.completed ? 'var(--bg-base)' : 'var(--bg-surface-hover)',
-                        border: `1px solid ${task.completed ? 'var(--border-subtle)' : 'var(--border-strong)'}`,
-                      }}>
+                    <AnimatePresence>
+                      {phase.tasks.map((task) => (
+                        <motion.div
+                          key={task.id}
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, height: 0, marginBottom: 0, padding: 0, overflow: 'hidden' }}
+                          layout
+                          style={{
+                            display: 'flex', flexDirection: 'column', gap: '6px',
+                            padding: '12px 14px', borderRadius: '8px',
+                            background: task.completed ? 'var(--bg-base)' : 'var(--bg-surface-hover)',
+                            border: `1px solid ${task.completed ? 'var(--border-subtle)' : 'var(--border-strong)'}`,
+                          }}
+                        >
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                           <button
                             onClick={() => handleToggleTask(phase.id, task.id, !task.completed)}
@@ -199,8 +216,9 @@ export default function PhasesView() {
                             onFocus={(e) => { (e.target as HTMLInputElement).style.borderColor = 'var(--border-strong)'; (e.target as HTMLInputElement).style.background = 'var(--bg-base)'; }}
                           />
                         </div>
-                      </div>
-                    ))}
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
                   </div>
 
                   {/* Add Task */}
@@ -217,8 +235,9 @@ export default function PhasesView() {
                       <Plus size={18} />
                     </button>
                   </div>
-                </div>
-              )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           );
         })}

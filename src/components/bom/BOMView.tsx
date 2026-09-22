@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useMission } from '../../store/missionStore';
 import { PartStatus, type BOMItem } from '../../types/mission';
 import { Cpu, Plus, Search, Pencil, Trash2, ChevronDown, ChevronUp, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 
 export default function BOMView() {
   const { data, fbAddBOMItem, fbUpdateBOMItem, fbDeleteBOMItem, addToast } = useMission();
@@ -132,9 +133,19 @@ export default function BOMView() {
             <p style={{ fontSize: '14px' }}>Nenhuma peça encontrada.</p>
           </div>
         ) : (
-          filtered.map((item, idx) => (
-            <div key={item.id} className="card animate-fade-in" style={{ padding: '16px', opacity: 0, animationDelay: `${idx * 0.03}s` }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', flexWrap: 'wrap' }}>
+          <AnimatePresence>
+            {filtered.map((item, idx) => (
+              <motion.div
+                key={item.id}
+                layout
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.2 }}
+                className="card"
+                style={{ padding: '16px' }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', flexWrap: 'wrap' }}>
                 <div style={{ flex: 1, minWidth: '220px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
                     <span className={`status-badge status-${item.status === PartStatus.TESTED ? 'nominal' : item.status === PartStatus.BOUGHT ? 'info' : 'warning'}`}>
@@ -162,14 +173,25 @@ export default function BOMView() {
                   <button onClick={() => handleDelete(item)} className="btn btn-danger" style={{ padding: '6px' }}><Trash2 size={16} /></button>
                 </div>
               </div>
-              {expandedIds.has(item.id) && (
-                <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid var(--border-subtle)' }}>
-                  <div style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '8px' }}>Detalhes Técnicos:</div>
-                  <textarea className="input" rows={2} defaultValue={item.details || ''} onBlur={(e) => fbUpdateBOMItem(item.id, { details: e.target.value })} placeholder="Especificações, links de compra, pinout..." style={{ fontSize: '13px' }} />
-                </div>
-              )}
-            </div>
-          ))
+              <AnimatePresence>
+                {expandedIds.has(item.id) && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    style={{ overflow: 'hidden' }}
+                  >
+                    <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid var(--border-subtle)' }}>
+                      <div style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '8px' }}>Detalhes Técnicos:</div>
+                      <textarea className="input" rows={2} defaultValue={item.details || ''} onBlur={(e) => fbUpdateBOMItem(item.id, { details: e.target.value })} placeholder="Especificações, links de compra, pinout..." style={{ fontSize: '13px' }} />
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          ))}
+        </AnimatePresence>
         )}
       </div>
 
@@ -189,9 +211,22 @@ function BOMModal({ item, onSave, onClose }: { item: BOMItem | null; onSave: (da
   const handleSubmit = (e: React.FormEvent) => { e.preventDefault(); onSave(form); };
 
   return (
-    <div className="modal-backdrop" onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="modal-content" style={{ padding: '24px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', paddingBottom: '16px', borderBottom: '1px solid var(--border-subtle)' }}>
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="modal-backdrop"
+        onClick={(e) => e.target === e.currentTarget && onClose()}
+      >
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.9, y: 20 }}
+          className="modal-content"
+          style={{ padding: '24px' }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', paddingBottom: '16px', borderBottom: '1px solid var(--border-subtle)' }}>
           <h3 style={{ fontSize: '16px', fontWeight: 600 }}>{item ? 'Editar Peça' : 'Adicionar Nova Peça'}</h3>
           <button onClick={onClose} className="btn btn-ghost" style={{ padding: '6px' }}><X size={18} /></button>
         </div>
@@ -239,7 +274,8 @@ function BOMModal({ item, onSave, onClose }: { item: BOMItem | null; onSave: (da
             <button type="submit" className="btn btn-primary">Salvar Peça</button>
           </div>
         </form>
-      </div>
-    </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
   );
 }
