@@ -1,0 +1,6 @@
+{
+  "name": "Projeto Ares - Mission Control",
+  "description": "Sistema de Gestão da Missão do rover análogo a Marte Projeto Ares com controle de peças (BOM), cronograma em 5 fases, telemetria em tempo real com gráficos (DHT11/LDR), canal de comunicação/chat da equipe e exportação/importação de dados.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
