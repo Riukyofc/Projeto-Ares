@@ -235,6 +235,7 @@ export default function PhasesView() {
                       <Plus size={18} />
                     </button>
                   </div>
+                    </div>
                   </motion.div>
                 )}
               </AnimatePresence>
